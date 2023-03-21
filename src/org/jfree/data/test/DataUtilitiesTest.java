@@ -32,11 +32,13 @@ public class DataUtilitiesTest {
         values2D = testValues;
         testValues.addValue(1, 0, 0);
         testValues.addValue(4, 1, 0);
+        sampleData = new DefaultKeyedValues();
     }
 
     @After
     public void tearDown() {
         values2D = null;
+        sampleData = null;
     }
 
     // Test cases for calculateColumnTotal()
@@ -396,13 +398,7 @@ public class DataUtilitiesTest {
         Number[] output = DataUtilities.createNumberArray(input);
         assertArrayEquals("Unexpected output", expectedOutput, output);
     }
-    @Test
-    public void testCreateNumberArray1() {
-        double[] input = {1.0, 2.0, 3.0, 4.0};
-        Number[] expectedOutput = {1.0, 2.0, 3.0, 4.0};
-        Number[] output = DataUtilities.createNumberArray(input);
-        assertArrayEquals("Unexpected output", expectedOutput, output);
-    }
+
     @Test
     public void testCreateNumberArray2D() {
         double[][] input = {{1.0, 2.0}, {3.0, 4.0}, {5.0, 6.0}};
@@ -412,4 +408,111 @@ public class DataUtilitiesTest {
     }
 
 
+    // Test cases for getCumulativePercentages()
+    @Test
+    public void testGetCumulativePercentages_NullInput() {
+        try {
+            DataUtilities.getCumulativePercentages(null);
+            fail("Expected an IllegalArgumentException to be thrown");
+        } catch (IllegalArgumentException e) {
+            // expected result
+        }
+    }
+
+    @Test
+    public void testGetCumulativePercentages_EmptyInput() {
+        KeyedValues result = DataUtilities.getCumulativePercentages(sampleData);
+        assertNotNull("Result should not be null", result);
+        assertEquals("Result size should be 0", 0, result.getItemCount());
+    }
+
+    private DefaultKeyedValues sampleData;
+
+    @Test
+    public void testGetCumulativePercentages_PositiveInput() {
+        sampleData.addValue("A", 10.0);
+        sampleData.addValue("B", 20.0);
+        sampleData.addValue("C", 30.0);
+        KeyedValues result = DataUtilities.getCumulativePercentages(sampleData);
+
+        assertNotNull("Result should not be null", result);
+        assertEquals("Result size should be 3", 3, result.getItemCount());
+        assertEquals(0.1666667, result.getValue("A").doubleValue(), 0.000001);
+        assertEquals(0.5, result.getValue("B").doubleValue(), 0.000001);
+        assertEquals(1.0, result.getValue("C").doubleValue(), 0.000001);
+    }
+
+    @Test
+    public void testGetCumulativePercentages_NegativeInput() {
+        sampleData.addValue("A", -10.0);
+        sampleData.addValue("B", -20.0);
+        sampleData.addValue("C", -30.0);
+        KeyedValues result = DataUtilities.getCumulativePercentages(sampleData);
+
+        assertNotNull("Result should not be null", result);
+        assertEquals("Result size should be 3", 3, result.getItemCount());
+        assertEquals(0.1666667, result.getValue("A").doubleValue(), 0.000001);
+        assertEquals(0.5, result.getValue("B").doubleValue(), 0.000001);
+        assertEquals(1.0, result.getValue("C").doubleValue(), 0.000001);
+    }
+
+    @Test
+    public void testCreateNumberArray2DWithEmptyArray() {
+        double[][] data = new double[0][0];
+        Number[][] numberData = DataUtilities.createNumberArray2D(data);
+
+        assertNotNull(numberData);
+        assertEquals(0, numberData.length);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCreateNumberArray2DWithNull() {
+        DataUtilities.createNumberArray2D(null);
+    }
+
+    @Test
+    public void testCreateNumberArray2DWithUnevenArray() {
+        double[][] data = {{1.0, 2.0, 3.0}, {4.0, 5.0}};
+        Number[][] numberData = DataUtilities.createNumberArray2D(data);
+
+        assertNotNull(numberData);
+        assertEquals(2, numberData.length);
+        assertEquals(3, numberData[0].length);
+        assertEquals(2, numberData[1].length);
+        assertEquals(1.0, numberData[0][0].doubleValue(), 0.0001);
+        assertEquals(2.0, numberData[0][1].doubleValue(), 0.0001);
+        assertEquals(3.0, numberData[0][2].doubleValue(), 0.0001);
+        assertEquals(4.0, numberData[1][0].doubleValue(), 0.0001);
+        assertEquals(5.0, numberData[1][1].doubleValue(), 0.0001);
+    }
+
+    @Test
+    public void testGetCumulativePercentages_withNullValue() {
+        DefaultKeyedValues keyedValues = new DefaultKeyedValues();
+        keyedValues.addValue("A", 5.0);
+        keyedValues.addValue("B", null);
+        keyedValues.addValue("C", 3.0);
+
+        KeyedValues result = DataUtilities.getCumulativePercentages(keyedValues);
+
+        assertEquals(3, result.getItemCount());
+        assertNotNull(result.getValue("A"));
+        assertNull(result.getValue("B"));
+        assertNotNull(result.getValue("C"));
+    }
+
+    @Test
+    public void testGetCumulativePercentages_withNonNullValue() {
+        DefaultKeyedValues keyedValues = new DefaultKeyedValues();
+        keyedValues.addValue("A", 5.0);
+        keyedValues.addValue("B", 9.0);
+        keyedValues.addValue("C", 3.0);
+
+        KeyedValues result = DataUtilities.getCumulativePercentages(keyedValues);
+
+        assertEquals(3, result.getItemCount());
+        assertNotNull(result.getValue("A"));
+        assertNotNull(result.getValue("B"));
+        assertNotNull(result.getValue("C"));
+    }
 }
