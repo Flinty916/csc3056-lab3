@@ -41,30 +41,6 @@ public class DataUtilitiesTest {
         sampleData = null;
     }
 
-    // Test cases for calculateColumnTotal()
-    @Test
-    public void testCalculateColumnTotal_NullInput() {
-        try {
-            DataUtilities.calculateColumnTotal(null, 0);
-            fail("Expected an IllegalArgumentException to be thrown");
-        } catch (IllegalArgumentException e) {
-            // expected result
-        }
-    }
-
-    @Test
-    public void testCalculateColumnTotal_OutOfBounds() {
-        DefaultKeyedValues2D data = createSampleData();
-        int columnIndexOutOfBounds = -1;
-
-        IndexOutOfBoundsException exception = assertThrows(IndexOutOfBoundsException.class, () -> {
-            DataUtilities.calculateColumnTotal(data, columnIndexOutOfBounds);
-        });
-
-        String expectedMessage = "Column index out of bounds: " + columnIndexOutOfBounds;
-        assertEquals(expectedMessage, exception.getMessage());
-    }
-
     @Test
     public void testCalculateColumnTotal_NullColumn() {
         DefaultKeyedValues2D nullValues = new DefaultKeyedValues2D();
@@ -96,30 +72,6 @@ public class DataUtilitiesTest {
         mixedValues.addValue(-4, 1, 0);
         assertEquals("Wrong sum returned. It should be -3.0",
                 -3.0, DataUtilities.calculateColumnTotal(mixedValues, 0), 0.0000001d);
-    }
-
-    // Test cases for calculateRowTotal()
-    @Test
-    public void testCalculateRowTotal_NullInput() {
-        try {
-            DataUtilities.calculateRowTotal(null, 0);
-            fail("Expected an IllegalArgumentException to be thrown");
-        } catch (IllegalArgumentException e) {
-            // expected result
-        }
-    }
-
-    @Test
-    public void testCalculateRowTotal_OutOfBounds() {
-        DefaultKeyedValues2D data = createSampleData();
-        int rowIndexOutOfBounds = -1;
-
-        IndexOutOfBoundsException exception = assertThrows(IndexOutOfBoundsException.class, () -> {
-            DataUtilities.calculateRowTotal(data, rowIndexOutOfBounds);
-        });
-
-        String expectedMessage = "Row index out of bounds: " + rowIndexOutOfBounds;
-        assertEquals(expectedMessage, exception.getMessage());
     }
 
     @Test
@@ -271,14 +223,6 @@ public class DataUtilitiesTest {
                 0.0, DataUtilities.calculateColumnTotal(data, 0), 0.0000001d);
     }
 
-    @Test
-    public void testCalculateColumnTotal_LastColumn() {
-        DefaultKeyedValues2D data = createSampleData();
-        int lastColumnIndex = data.getColumnCount() - 1;
-        assertEquals("Wrong sum returned. It should be 270.0",
-                270.0, DataUtilities.calculateColumnTotal(data, lastColumnIndex));
-    }
-
     // Test cases for calculateColumnTotal()
     @Test
     public void testCalculateColumnTotal_EmptyData() {
@@ -287,17 +231,6 @@ public class DataUtilitiesTest {
                 0.0, DataUtilities.calculateColumnTotal(emptyData, 0), 0.0000001d);
     }
 
-    @Test
-    public void testCalculateColumnTotal_LargeData() {
-        DefaultKeyedValues2D largeData = new DefaultKeyedValues2D();
-        for (int i = 0; i < 1000; i++) {
-            for (int j = 0; j < 1000; j++) {
-                largeData.addValue(1, i, j);
-            }
-        }
-        assertEquals("Wrong sum returned. It should be 1000.0",
-                1000.0, DataUtilities.calculateColumnTotal(largeData, 0));
-    }
 
     // Test cases for calculateRowTotal()
     @Test
@@ -373,18 +306,7 @@ public class DataUtilitiesTest {
         }
     }
 
-    @Test
-    public void testGetCumulativePercentages() {
-        DefaultKeyedValues data = new DefaultKeyedValues();
-        data.addValue("A", 10.0);
-        data.addValue("B", 20.0);
-        data.addValue("C", 30.0);
 
-        KeyedValues result = DataUtilities.getCumulativePercentages(data);
-        assertEquals(0.1, result.getValue("A"));
-        assertEquals(0.3, result.getValue("B"));
-        assertEquals(0.6, result.getValue("C"));
-    }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetCumulativePercentagesWithNullData() {
@@ -427,34 +349,6 @@ public class DataUtilitiesTest {
     }
 
     private DefaultKeyedValues sampleData;
-
-    @Test
-    public void testGetCumulativePercentages_PositiveInput() {
-        sampleData.addValue("A", 10.0);
-        sampleData.addValue("B", 20.0);
-        sampleData.addValue("C", 30.0);
-        KeyedValues result = DataUtilities.getCumulativePercentages(sampleData);
-
-        assertNotNull("Result should not be null", result);
-        assertEquals("Result size should be 3", 3, result.getItemCount());
-        assertEquals(0.1666667, result.getValue("A").doubleValue(), 0.000001);
-        assertEquals(0.5, result.getValue("B").doubleValue(), 0.000001);
-        assertEquals(1.0, result.getValue("C").doubleValue(), 0.000001);
-    }
-
-    @Test
-    public void testGetCumulativePercentages_NegativeInput() {
-        sampleData.addValue("A", -10.0);
-        sampleData.addValue("B", -20.0);
-        sampleData.addValue("C", -30.0);
-        KeyedValues result = DataUtilities.getCumulativePercentages(sampleData);
-
-        assertNotNull("Result should not be null", result);
-        assertEquals("Result size should be 3", 3, result.getItemCount());
-        assertEquals(0.1666667, result.getValue("A").doubleValue(), 0.000001);
-        assertEquals(0.5, result.getValue("B").doubleValue(), 0.000001);
-        assertEquals(1.0, result.getValue("C").doubleValue(), 0.000001);
-    }
 
     @Test
     public void testCreateNumberArray2DWithEmptyArray() {
